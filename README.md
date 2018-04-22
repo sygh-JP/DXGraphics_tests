@@ -8,18 +8,18 @@ Tests of DirectX Graphics by sygh.
 ## Target Environment (ターゲット環境)
 For DirectX 11 samples
 * Windows Vista SP2 Platform Update/Windows 7/Windows 8.1/Windows 10 (Desktop)
-* Graphics device compatible with DirectX 10.0
-* Graphics driver compatible with DirectX 10.1
+* Graphics device compatible with DirectX 11.0 (Feature Level 11_0)
+* Graphics driver compatible with DirectX 11.0 API
 
 For DirectX 11.1 samples
 * Windows 7 SP1 Platform Update/Windows 8.1/Windows 10 (Desktop)
-* Graphics device compatible with DirectX 11.0
-* Graphics driver compatible with DirectX 11.1
+* Graphics device compatible with DirectX 11.0 (Feature Level 11_0)
+* Graphics driver compatible with DirectX 11.1 API
 
 For DirectX 12 samples
 * Windows 10 1511 (build 10586) or later
-* Graphics device compatible with DirectX 11.0
-* Graphics driver compatible with DirectX 12
+* Graphics device compatible with DirectX 11.0 (Feature Level 11_0)
+* Graphics driver compatible with DirectX 12 API
 
 ## How to Build (ビルド方法)
 1. Build each solution file
