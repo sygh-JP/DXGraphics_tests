@@ -1,0 +1,54 @@
+﻿以前MSDNフォーラムにて回答した内容。
+
+
+MFC用のDirect2Dラッパークラス（VS2010 SP1で追加された機能）を使う場合、
+CD2DBitmapのコンストラクタにはBITMAPやICONのリソース (RT_BITMAP, RT_GROUP_ICON) を直接渡してはいけない。
+VS2012/2013/2015でも同様。
+
+MFCの実装:
+
+%ProgramFiles(x86)%\Microsoft Visual Studio ??.?\VC\atlmfc\src\mfc\afxrendertarget.cpp
+
+をデバッガーなどで追っていけば分かるが、内部でリソースのストリームをもとにWICのデコーダーを使ってメタ情報を取得している模様。
+
+実は.rcファイルにBITMAPタイプとして記述されたビットマップファイルは、ビルド時にWindowsビットマップファイルフォーマット固有のヘッダー情報の一部
+（マジックナンバーなどを含む、先頭14バイトのBITMAPFILEHEADER構造体に相当する領域）が欠落した状態でリンクされてしまうため、
+この不完全ストリームをWICのCreateDecoderFromStream()に渡しても読み込みが失敗する。
+例えばSizeofResource()の結果が、ビルド時に使ったビットマップファイルの実サイズとは異なる。
+
+もしリソースIDを指定してロードする場合、まず独自のカスタムタイプのリソースとして、MFCアプリケーションウィザードが生成した.rc2ファイルに定義する。
+
+例えばID_MY_TEST_IMAGE01, ID_MY_TEST_IMAGE02, ID_MY_TEST_IMAGE03がresource.hにあらかじめカスタム定義されているものとすると、
+
+ID_MY_TEST_IMAGE01    MYRESTYPE_BITMAP    "res\\image01.bmp"
+ID_MY_TEST_IMAGE02    MYRESTYPE_ICON      "res\\image02.ico"
+ID_MY_TEST_IMAGE03    BITMAP              "res\\image03_32bpp_bgra.bmp"
+
+のような感じで.rc2ファイルに記述しておき、
+
+CD2DBitmap bmp(&rt, ID_MY_TEST_IMAGE01, _T("MYRESTYPE_BITMAP"));
+bmp.Create(&rt);
+
+もしくは
+
+CD2DBitmap bmp(&rt, ID_MY_TEST_IMAGE02, _T("MYRESTYPE_ICON"));
+bmp.Create(&rt);
+
+のように渡す。カスタムリソースを使う場合、WICが対応してさえいればいいので、PNGやJPEG、TIFFなども使える。
+MFC内部で自動的にWICを使ってGUID_WICPixelFormat32bppPBGRAとしてコンバートしてくれるので、BGRAだけでなくBGR、BGRXやRGB、RGBAも使える。
+
+一方、HBITMAPを渡してDirect2Dビットマップを作成する場合、WICのCreateBitmapFromHBITMAP()呼び出し時にWICBitmapUseAlphaを渡しているので、
+必ずアルファチャンネルを含んだBGRA 32bitビットマップを使う必要がある模様。
+Adobe Photoshopが生成するようなアルファチャンネルを含まないBGRX 32bitビットマップは使えない（表示されない）。
+他のBGRA 32bitビットマップ対応ツールを使うか、GDIではなくGDI+を使ってPNGからロードしてHBITMAPを作成する必要がある。
+なお、WICのBMPエンコーダー／デコーダー (GUID_ContainerFormatBmp) はBGRAに対応しておらず、アルファチャンネルが無視されてBGRX扱いになるらしい。
+
+CBitmap mfcBmp;
+mfcBmp.LoadBitmap(ID_MY_TEST_IMAGE03);
+CD2DBitmap d2dBmp(&rt, static_cast<HBITMAP>(mfcBmp));
+
+
+ちなみに.rcファイル中のBITMAPタイプに対応するリソース識別子はRT_BITMAP。
+_T("BITMAP")は使えない。GDIの常識。
+
+BITMAPタイプのリソースは.rc2ファイルではなく.rcファイルに定義してもOK。
