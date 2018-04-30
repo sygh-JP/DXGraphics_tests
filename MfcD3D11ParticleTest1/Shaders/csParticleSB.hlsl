@@ -4,12 +4,12 @@
 #include "CommonDefs.hlsli"
 
 
-RWStructuredBuffer<VSInputParticle2> UniParticleBuffer : register(u0);
+RWStructuredBuffer<VSInputParticle2> UavParticleBuffer : register(u0);
 
 
 void ResetParticle(uint globalIndex)
 {
-	VSInputParticle2 inoutData = UniParticleBuffer[globalIndex];
+	VSInputParticle2 inoutData = UavParticleBuffer[globalIndex];
 
 	const uint4 random0 = inoutData.RandomSeed;
 	const uint4 random1 = Xorshift128Random::CreateNext(random0);
@@ -30,19 +30,19 @@ void ResetParticle(uint globalIndex)
 	inoutData.RandomSeed = random4;
 	// This random number will be used on next initialization.
 
-	UniParticleBuffer[globalIndex] = inoutData;
+	UavParticleBuffer[globalIndex] = inoutData;
 }
 
 void UpdateParticle(uint globalIndex)
 {
-	VSInputParticle2 inoutData = UniParticleBuffer[globalIndex];
+	VSInputParticle2 inoutData = UavParticleBuffer[globalIndex];
 
 	inoutData.Position += inoutData.Velocity;
 	inoutData.Velocity.y -= UniGravity;
 	inoutData.Angle += inoutData.DeltaAngle;
 	inoutData.Size = UniParticleInitSize;
 
-	UniParticleBuffer[globalIndex] = inoutData;
+	UavParticleBuffer[globalIndex] = inoutData;
 }
 
 

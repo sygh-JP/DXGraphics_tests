@@ -14,6 +14,7 @@ using namespace DirectX;
 
 //! @brief  空のオーナードローを行なうスタティック コントロール。枠線すら描画しない。<br>
 //! GDI を一切使わず、Direct3D や OpenGL のみでコントロール内部を描画する場合に使う。<br>
+//! WS_CLIPCHILDREN を使えない場面などで活用すべし。<br>
 class CMyEmptyStatic: public CStatic
 {
 public:

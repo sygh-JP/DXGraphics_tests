@@ -4,7 +4,7 @@
 #include "CommonDefs.hlsli"
 
 
-RWByteAddressBuffer UniParticleBuffer : register(u0);
+RWByteAddressBuffer UavParticleBuffer : register(u0);
 
 
 #define SIZEOF_FLOAT  (4)
@@ -21,7 +21,7 @@ void ResetParticle(uint globalIndex)
 {
 	const uint vbBaseOffset = globalIndex * VERTEX_ELEM_SIZE;
 
-	const uint4 random0 = UniParticleBuffer.Load4(vbBaseOffset + RANDOM_OFFSET);
+	const uint4 random0 = UavParticleBuffer.Load4(vbBaseOffset + RANDOM_OFFSET);
 	const uint4 random1 = Xorshift128Random::CreateNext(random0);
 	const uint4 random2 = Xorshift128Random::CreateNext(random1);
 	const uint4 random3 = Xorshift128Random::CreateNext(random2);
@@ -36,12 +36,12 @@ void ResetParticle(uint globalIndex)
 	position += velocity;
 	velocity.y -= UniGravity;
 	angle += deltaAngle;
-	UniParticleBuffer.Store3(vbBaseOffset + POSITION_OFFSET, asuint(position));
-	UniParticleBuffer.Store3(vbBaseOffset + VELOCITY_OFFSET, asuint(velocity));
-	UniParticleBuffer.Store(vbBaseOffset + ANGLE_OFFSET, asuint(angle));
-	UniParticleBuffer.Store(vbBaseOffset + DANGLE_OFFSET, asuint(deltaAngle));
-	UniParticleBuffer.Store(vbBaseOffset + PSIZE_OFFSET, asuint(UniParticleInitSize));
-	UniParticleBuffer.Store4(vbBaseOffset + RANDOM_OFFSET, random4);
+	UavParticleBuffer.Store3(vbBaseOffset + POSITION_OFFSET, asuint(position));
+	UavParticleBuffer.Store3(vbBaseOffset + VELOCITY_OFFSET, asuint(velocity));
+	UavParticleBuffer.Store(vbBaseOffset + ANGLE_OFFSET, asuint(angle));
+	UavParticleBuffer.Store(vbBaseOffset + DANGLE_OFFSET, asuint(deltaAngle));
+	UavParticleBuffer.Store(vbBaseOffset + PSIZE_OFFSET, asuint(UniParticleInitSize));
+	UavParticleBuffer.Store4(vbBaseOffset + RANDOM_OFFSET, random4);
 	// This random number will be used on next initialization.
 }
 
@@ -49,17 +49,17 @@ void UpdateParticle(uint globalIndex)
 {
 	const uint vbBaseOffset = globalIndex * VERTEX_ELEM_SIZE;
 
-	float3 position = asfloat(UniParticleBuffer.Load3(vbBaseOffset + POSITION_OFFSET));
-	float3 velocity = asfloat(UniParticleBuffer.Load3(vbBaseOffset + VELOCITY_OFFSET));
-	float angle = asfloat(UniParticleBuffer.Load(vbBaseOffset + ANGLE_OFFSET));
-	const float deltaAngle = asfloat(UniParticleBuffer.Load(vbBaseOffset + DANGLE_OFFSET));
+	float3 position = asfloat(UavParticleBuffer.Load3(vbBaseOffset + POSITION_OFFSET));
+	float3 velocity = asfloat(UavParticleBuffer.Load3(vbBaseOffset + VELOCITY_OFFSET));
+	float angle = asfloat(UavParticleBuffer.Load(vbBaseOffset + ANGLE_OFFSET));
+	const float deltaAngle = asfloat(UavParticleBuffer.Load(vbBaseOffset + DANGLE_OFFSET));
 	position += velocity;
 	velocity.y -= UniGravity;
 	angle += deltaAngle;
-	UniParticleBuffer.Store3(vbBaseOffset + POSITION_OFFSET, asuint(position));
-	UniParticleBuffer.Store3(vbBaseOffset + VELOCITY_OFFSET, asuint(velocity));
-	UniParticleBuffer.Store(vbBaseOffset + ANGLE_OFFSET, asuint(angle));
-	UniParticleBuffer.Store(vbBaseOffset + PSIZE_OFFSET, asuint(UniParticleInitSize));
+	UavParticleBuffer.Store3(vbBaseOffset + POSITION_OFFSET, asuint(position));
+	UavParticleBuffer.Store3(vbBaseOffset + VELOCITY_OFFSET, asuint(velocity));
+	UavParticleBuffer.Store(vbBaseOffset + ANGLE_OFFSET, asuint(angle));
+	UavParticleBuffer.Store(vbBaseOffset + PSIZE_OFFSET, asuint(UniParticleInitSize));
 	// The original program stored delta-angle instead of angle (Maybe just a bug)
 }
 

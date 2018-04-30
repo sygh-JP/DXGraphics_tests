@@ -81,40 +81,75 @@ BEGIN_MESSAGE_MAP(CMfcD3D11ParticleTest1Dlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-namespace
+namespace MyUtils
 {
-	bool LoadBinaryFromFile(LPCTSTR filePath, std::vector<char>& outBinBuf)
+	template<typename T> void LoadBinaryFromFileImpl(LPCWSTR pFilePath, std::vector<T>& outBuffer)
 	{
-		std::ifstream fileStream(filePath, std::ios::binary);
-		if (fileStream.fail())
+		outBuffer.clear();
+
+		struct _stat64 fileStats = {};
+		const auto getFileStatFunc = _wstat64;
+
+		if (getFileStatFunc(pFilePath, &fileStats) != 0 || fileStats.st_size < 0)
 		{
-			return false;
+			throw std::exception("Cannot get the file stats for the file!!");
 		}
 
-		fileStream.seekg(0, std::fstream::end);
-		const auto endPos = fileStream.tellg();
-		fileStream.clear();
-		fileStream.seekg(0, std::fstream::beg);
-		const auto begPos = fileStream.tellg();
-		const auto fileSize = endPos - begPos; // VC++ 2012 では 32bit 版でも long long になるらしい。
-		// MFC や GDI+ では NOMINMAX を定義できず、邪魔というか邪悪な min/max マクロを無効化できない。
-		// 今回は別に Windows SDK で定義されている SIZE_T_MAX などを代替として使う方法もあるが、
-		// コードレベルでの移植性を高めるために、小技を使ってマクロ展開を回避する。
-		// http://d.hatena.ne.jp/yohhoy/20120115/p1
-		const auto maxSize = (std::numeric_limits<size_t>::max)();
-		if (fileSize < 0 || maxSize < uint64_t(fileSize))
+		if (fileStats.st_size % sizeof(T) != 0)
 		{
-			// 32bit 版では 4GB を超えるファイルに対応しない。
-			return false;
+			throw std::exception("The file size is not a multiple of the expected size of element!!");
 		}
 
-		outBinBuf.resize(static_cast<size_t>(fileSize));
+		const auto fileSizeInBytes = static_cast<uint64_t>(fileStats.st_size);
 
-		fileStream.read(&outBinBuf[0], fileSize);
+		if (sizeof(size_t) < 8 && (std::numeric_limits<size_t>::max)() < fileSizeInBytes)
+		{
+			throw std::exception("The file size is over the capacity on this platform!!");
+		}
 
-		return true;
+		if (fileStats.st_size == 0)
+		{
+			return;
+		}
+
+		const auto numElementsInFile = static_cast<size_t>(fileStats.st_size / sizeof(T));
+
+		outBuffer.resize(numElementsInFile);
+
+		FILE* pFile = nullptr;
+		const auto retCode = _wfopen_s(&pFile, pFilePath, L"rb");
+		if (retCode != 0 || pFile == nullptr)
+		{
+			throw std::exception("Cannot open the file!!");
+		}
+		fread_s(&outBuffer[0], numElementsInFile * sizeof(T), sizeof(T), numElementsInFile, pFile);
+		fclose(pFile);
+		pFile = nullptr;
 	}
 
+	template<typename T> bool LoadBinaryFromFileImpl2(LPCWSTR pFilePath, std::vector<T>& outBuffer)
+	{
+		try
+		{
+			LoadBinaryFromFileImpl(pFilePath, outBuffer);
+			return true;
+		}
+		catch (const std::exception& ex)
+		{
+			const CStringW strMsg(ex.what());
+			ATLTRACE(L"%s <%s>\n", strMsg.GetString(), pFilePath);
+			return false;
+		}
+	}
+
+	bool LoadBinaryFromFile(LPCWSTR pFilePath, std::vector<char>& outBuffer)
+	{
+		return LoadBinaryFromFileImpl2(pFilePath, outBuffer);
+	}
+}
+
+namespace
+{
 	const D3D11_INPUT_ELEMENT_DESC VertexInputLayoutDescArrayPT[] =
 	{
 		// LPCSTR SemanticName, UINT SemanticIndex, DXGI_FORMAT Format, UINT InputSlot, UINT AlignedByteOffset, D3D11_INPUT_CLASSIFICATION InputSlotClass, UINT InstanceDataStepRate.
@@ -511,6 +546,8 @@ bool CMfcD3D11ParticleTest1Dlg::InitDirect3D(HWND hWnd)
 		dirPath.RemoveFileSpec();
 
 		std::vector<char> shaderBinBuf;
+
+		using MyUtils::LoadBinaryFromFile;
 
 		{
 			ATL::CPath shaderBinFilePath(dirPath);
@@ -1044,7 +1081,9 @@ BOOL CMfcD3D11ParticleTest1Dlg::OnInitDialog()
 
 	if (!this->InitDirect3D(m_ddxcPicture1.GetSafeHwnd()))
 	{
-		this->SendMessage(WM_CLOSE);
+		//this->SendMessage(WM_CLOSE);
+		//this->OnCancel();
+		this->EndDialog(IDCANCEL);
 		return true;
 	}
 

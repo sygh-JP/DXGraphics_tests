@@ -1,5 +1,15 @@
 ﻿#pragma once
 
+// <Windows.h>, <cfloat> は別途インクルードしてください。
+
+// 高分解能ストップウォッチ クラスおよびマルチメディア ストップウォッチ クラスの定義。
+// 
+// .NET の System.Diagnostics.Stopwatch が内部で使用している API と同じ高分解能パフォーマンス カウンターを使う。
+// なお、Windows XP およびそれ以前の OS では、計測開始時の CPU クロック周波数を取得して、それを基準に計算を行なうので、
+// Intel Turbo Boost や AMD Turbo Core などの動的オーバークロック機能を持つ CPU では正しく計測できない。
+// Windows Vista 以降の OS と HPET をサポートする M/B の組み合わせでは、
+// 同 API は HPET (High Precision Event Timer) で実時間取得するようになっているらしく、
+// 特に大きな問題にはならないらしい。
 
 namespace MyUtil
 {
@@ -9,7 +19,8 @@ namespace MyUtil
 	class HRStopwatch
 	{
 	private:
-		static LARGE_INTEGER m_freq;
+		//static LARGE_INTEGER m_freq;
+
 		LARGE_INTEGER m_start;
 		INT64 m_accumulatedValue;
 		bool m_isStarted;
@@ -45,6 +56,12 @@ namespace MyUtil
 			m_isStarted = false;
 		}
 
+		void Restart()
+		{
+			this->Reset();
+			this->Start();
+		}
+
 		double GetElapsedTimeInSeconds() const
 		{ return double(m_accumulatedValue) / double(GetFrequency()); }
 
@@ -53,17 +70,24 @@ namespace MyUtil
 
 		static bool Initialize()
 		{
-			return !!::QueryPerformanceFrequency(&m_freq);
+			return !!::QueryPerformanceFrequency(&GetFrequencyRef());
 		}
 
 		static INT64 GetFrequency()
 		{
-			return m_freq.QuadPart;
+			return GetFrequencyRef().QuadPart;
+		}
+
+	private:
+		static LARGE_INTEGER& GetFrequencyRef()
+		{
+			static LARGE_INTEGER freq;
+			return freq;
 		}
 	};
 
 #ifdef _MSC_VER
-	__declspec(selectany) LARGE_INTEGER HRStopwatch::m_freq;
+	//__declspec(selectany) LARGE_INTEGER HRStopwatch::m_freq;
 #endif
 
 
@@ -108,6 +132,12 @@ namespace MyUtil
 			m_start = 0;
 			m_accumulatedValue = 0;
 			m_isStarted = false;
+		}
+
+		void Restart()
+		{
+			this->Reset();
+			this->Start();
 		}
 
 		double GetElapsedTimeInSeconds() const
