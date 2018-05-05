@@ -39,8 +39,8 @@ CMfcD3D11ParticleTest1App theApp;
 
 BOOL CMfcD3D11ParticleTest1App::InitInstance()
 {
-	MyUtil::MMStopwatch::Initialize();
-	MyUtil::HRStopwatch::Initialize();
+	MyUtils::MMStopwatch::Initialize();
+	MyUtils::HRStopwatch::Initialize();
 
 	// アプリケーション マニフェストが visual スタイルを有効にするために、
 	// ComCtl32.dll Version 6 以降の使用を指定する場合は、
@@ -100,7 +100,7 @@ BOOL CMfcD3D11ParticleTest1App::InitInstance()
 		delete pShellManager;
 	}
 
-	MyUtil::MMStopwatch::Uninitialize();
+	MyUtils::MMStopwatch::Uninitialize();
 
 	// ダイアログは閉じられました。アプリケーションのメッセージ ポンプを開始しないで
 	//  アプリケーションを終了するために FALSE を返してください。

@@ -251,7 +251,7 @@ private:
 	UINT_PTR m_renderingTimerID;
 
 private:
-	MyUtil::HRStopwatch m_stopwatch;
+	MyUtils::HRStopwatch m_stopwatch;
 	uint32_t m_frameCounter;
 
 private:
