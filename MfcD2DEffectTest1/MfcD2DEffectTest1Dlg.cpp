@@ -19,10 +19,10 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// ダイアログ データ
+	// ダイアログ データ
 	enum { IDD = IDD_ABOUTBOX };
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 
 // 実装
@@ -73,7 +73,7 @@ END_MESSAGE_MAP()
 
 bool CMfcD2DEffectTest1Dlg::InitDirectX(CWnd& target)
 {
-	CRect winRect(0,0,0,0);
+	CRect winRect(0, 0, 0, 0);
 	target.GetWindowRect(winRect);
 
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
@@ -163,7 +163,7 @@ bool CMfcD2DEffectTest1Dlg::InitDirectX(CWnd& target)
 		//D2D1::ColorF(D2D1::ColorF::HotPink),
 		D2D1::ColorF(D2D1::ColorF::Violet),
 		m_d2dLightningBrush.GetAddressOf()
-		);
+	);
 	if (FAILED(hr) || !m_d2dLightningBrush)
 	{
 		AfxMessageBox(_T("Failed to create D2D brush!!"));
@@ -172,8 +172,8 @@ bool CMfcD2DEffectTest1Dlg::InitDirectX(CWnd& target)
 
 	const D2D1_BITMAP_PROPERTIES1 backBufferBitmapProps =
 		D2D1::BitmapProperties1(
-		D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW, // RTV として使うが、SRV としては使わない。
-		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+			D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW, // RTV として使うが、SRV としては使わない。
+			D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 		);
 
 	Microsoft::WRL::ComPtr<IDXGISurface> dxgiBackBufferSurface;
@@ -191,7 +191,7 @@ bool CMfcD2DEffectTest1Dlg::InitDirectX(CWnd& target)
 		dxgiBackBufferSurface.Get(),
 		&backBufferBitmapProps,
 		m_d2dBackBufferBitmap.ReleaseAndGetAddressOf()
-		);
+	);
 	if (FAILED(hr))
 	{
 		return false;
@@ -199,8 +199,8 @@ bool CMfcD2DEffectTest1Dlg::InitDirectX(CWnd& target)
 
 	const D2D1_BITMAP_PROPERTIES1 workBitmapProps =
 		D2D1::BitmapProperties1(
-		D2D1_BITMAP_OPTIONS_TARGET, // RTV, SRV として使う。
-		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+			D2D1_BITMAP_OPTIONS_TARGET, // RTV, SRV として使う。
+			D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 		);
 
 	const auto backBufferSize = m_d2dBackBufferBitmap->GetPixelSize();
@@ -324,7 +324,10 @@ BOOL CMfcD2DEffectTest1Dlg::OnInitDialog()
 
 	if (!this->InitDirectX(m_ddxcPicture1))
 	{
-		this->SendMessage(WM_CLOSE);
+		//this->SendMessage(WM_CLOSE);
+		//this->OnCancel();
+		this->EndDialog(IDCANCEL);
+		return true;
 	}
 
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。

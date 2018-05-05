@@ -14,7 +14,7 @@ class CMfcD2DEffectTest1Dlg : public CDialogEx
 {
 	// コンストラクション
 public:
-	CMfcD2DEffectTest1Dlg(CWnd* pParent = NULL); // 標準コンストラクター
+	explicit CMfcD2DEffectTest1Dlg(CWnd* pParent = NULL); // 標準コンストラクター
 
 	// ダイアログ データ
 	enum { IDD = IDD_MFCD2DEFFECTTEST1_DIALOG };
