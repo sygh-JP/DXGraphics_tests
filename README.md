@@ -7,7 +7,7 @@ Tests of DirectX Graphics by sygh.
 
 ## Target Environment (ターゲット環境)
 For DirectX 10.1 samples
-* Windows Vista SP2/Windows 7/Windows 8.1/Windows 10 (Desktop)
+* Windows Vista SP1/Windows 7/Windows 8.1/Windows 10 (Desktop)
 * Graphics device compatible with DirectX 10.1 (Feature Level 10_1)
 * Graphics driver compatible with DirectX 10.1 API
 
@@ -29,4 +29,4 @@ For DirectX 12 samples
 ## How to Build (ビルド方法)
 1. Build each solution file
 
-2018-05-08, sygh.
+2018-05-10, sygh.

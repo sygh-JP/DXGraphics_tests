@@ -58,6 +58,13 @@ public:
 			D3D10_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
 
+		// Direct3D 10.1 自体は Vista SP1 で実装され、
+		// 初期化時に D3D10_FEATURE_LEVEL_10_0 と D3D10_FEATURE_LEVEL_10_1 が選択できるようになったが、
+		// ダウンレベルである D3D10_FEATURE_LEVEL_9_1, D3D10_FEATURE_LEVEL_9_2, D3D10_FEATURE_LEVEL_9_3 が使えるのは
+		// Direct3D 11 ランタイムがインストールされている環境であることに注意。
+		// Windows 7 だと無印で利用可能だが、Vista の場合は SP2 + Platform Update が必要。
+		// https://msdn.microsoft.com/en-us/library/windows/desktop/bb694529.aspx
+		// https://msdn.microsoft.com/ja-jp/library/ee415631.aspx
 		ThrowIfFailed(D3D10CreateDeviceAndSwapChain1(
 			nullptr,
 			D3D10_DRIVER_TYPE_HARDWARE,
